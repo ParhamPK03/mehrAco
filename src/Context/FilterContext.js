@@ -1,22 +1,27 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const FilterContext = createContext();
 
 export const FilterProvider = ({ children }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const pageParam = parseInt(searchParams.get('page') || '1');
 
- 
-  const [page, setPage] = useState(pageParam);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  // خواندن پارامترهای URL بدون استفاده از useSearchParams
+  const getInitialPage = () => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return parseInt(params.get("page")) || 1;
+    }
+    return 1;
+  };
+
+  const [page, setPage] = useState(getInitialPage());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [sort, setSort] = useState('cheapest');
+  const [sort, setSort] = useState("cheapest");
   const [maxPrice, setMaxPrice] = useState(null);
-
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -27,18 +32,15 @@ export const FilterProvider = ({ children }) => {
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
- 
   useEffect(() => {
     setPage(1);
   }, [selectedBrands]);
 
- 
   const handlePageChange = (newPage) => {
     setPage(newPage);
     router.push(`?page=${newPage}`);
   };
 
-  
   const value = {
     page,
     searchTerm,
@@ -54,16 +56,14 @@ export const FilterProvider = ({ children }) => {
   };
 
   return (
-    <FilterContext.Provider value={value}>
-      {children}
-    </FilterContext.Provider>
+    <FilterContext.Provider value={value}>{children}</FilterContext.Provider>
   );
 };
 
 export const useFilter = () => {
   const context = useContext(FilterContext);
   if (!context) {
-    throw new Error('useFilter must be used within a FilterProvider');
+    throw new Error("useFilter must be used within a FilterProvider");
   }
   return context;
 };
