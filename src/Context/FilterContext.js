@@ -7,7 +7,6 @@ const FilterContext = createContext();
 export const FilterProvider = ({ children }) => {
   const router = useRouter();
 
-  // خواندن پارامترهای URL بدون استفاده از useSearchParams
   const getInitialPage = () => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
